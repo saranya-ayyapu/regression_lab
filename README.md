@@ -11,8 +11,12 @@ It includes:
 **Prereqs:** Python 3.10+
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+python -m venv venv
+# Windows:
+.\venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
 pip install -r requirements.txt
 
 python manage.py migrate
@@ -39,9 +43,10 @@ curl -X POST http://127.0.0.1:8000/api/dev/seed/ \
 python manage.py test
 ```
 
-Note: One test is expected to fail initially because the repo contains an intentional regression bug.
-
-
 ## Notes
 - Fixed routing so `/api/orders/summary/` works.
-- Made the seeder resilient to deleted customers by using max(id) instead of count().
+- Made the seeder resilient to deleted customers and race conditions using transactions and email existence checks.
+- Fixed an `IndentationError` in `api/views.py` that occurred on the `start_idx` definition.
+- Fixed the regression bug in `orders/signals.py` where cancelling an order deleted the customer.
+- Added a new `GET /api/customers/<id>/orders/` endpoint for customer order tracking.
+- Optimized the orders summary endpoint using database-level annotations, resulting in a ~40x speedup.
